@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplex Method - Interactive Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 50%, #40916c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background: #2d6a4f;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 18px 25px;
+            background: #40916c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-right: 1px solid #2d6a4f;
+        }
+
+        .nav-btn:last-child {
+            border-right: none;
+        }
+
+        .nav-btn:hover {
+            background: #52b788;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: #74c69d;
+            box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .content {
+            padding: 40px;
+            min-height: 500px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #1b4332;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #52b788;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #2d6a4f;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        p {
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .term-card {
+            background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border-left: 5px solid #2d6a4f;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .term-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+        }
+
+        .term-title {
+            color: #1b4332;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .quiz-question {
+            background: #e8f5e9;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 15px;
+            border: 3px solid #52b788;
+        }
+
+        .question-text {
+            font-size: 1.25em;
+            color: #1b4332;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .option {
+            background: white;
+            padding: 18px 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #95d5b2;
+            display: block;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        .option:hover {
+            background: #d8f3dc;
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(45, 106, 79, 0.2);
+        }
+
+        .option input {
+            margin-right: 12px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+        }
+
+        .option label {
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #40916c, #52b788);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 106, 79, 0.4);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 1.3em;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #d8f3dc, #95d5b2);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 6px solid #2d6a4f;
+        }
+
+        ul {
+            margin-left: 25px;
+            line-height: 2;
+        }
+
+        li {
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #f0fff4, #d8f3dc);
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 15px;
+            border: 3px solid #52b788;
+            box-shadow: 0 5px 15px rgba(45, 106, 79, 0.2);
+        }
+
+        .example-title {
+            color: #1b4332;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .example-icon {
+            font-size: 1.3em;
+        }
+
+        .problem-statement {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #40916c;
+        }
+
+        .solution-steps {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .step {
+            margin: 15px 0;
+            padding-left: 15px;
+        }
+
+        .step-number {
+            color: #2d6a4f;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .formula {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            text-align: center;
+            border: 2px dashed #52b788;
+            color: #1b4332;
+        }
+
+        .highlight-box {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #fbc02d;
+        }
+
+        .answer-box {
+            background: linear-gradient(135deg, #b7e4c7, #95d5b2);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 1.15em;
+            text-align: center;
+            color: #1b4332;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #2d6a4f;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #95d5b2;
+        }
+
+        tr:nth-child(even) {
+            background: #f0fff4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Simplex Method</h1>
+            <p class="subtitle">Master Linear Programming with Interactive Learning</p>
+        </header>
+
+        <nav>
+            <button class="nav-btn active" onclick="showSection('introduction')">Introduction</button>
+            <button class="nav-btn" onclick="showSection('terms')">Key Terms</button>
+            <button class="nav-btn" onclick="showSection('examples')">Examples</button>
+            <button class="nav-btn" onclick="showSection('quiz')">Take Quiz</button>
+        </nav>
+
+        <div class="content">
+            <!-- Introduction Section -->
+            <div id="introduction" class="section active">
+                <h2>📚 Introduction to Simplex Method</h2>
+                <div class="intro-box">
+                    <p><strong>The Simplex Method</strong> is a powerful algorithmic technique developed by George Dantzig in 1947 for solving linear programming problems by finding the optimal solution to a problem with a linear objective function and linear constraint. It's one of the most widely used optimization methods in operations research and management science.</p>
+                </div>
+
+                <h3>What is Linear Programming?</h3>
+                <p>Linear programming is a mathematical method for determining the best outcome (such as maximum profit or minimum cost) in a mathematical model with linear relationships. The Simplex Method systematically examines the corner points of the feasible region to find the optimal solution.</p>
+
+                <h3>Why Use the Simplex Method?</h3>
+                <ul>
+                    <li><strong>Efficiency:</strong> Solves complex optimization problems quickly</li>
+                    <li><strong>Reliability:</strong> Guarantees an optimal solution if one exists</li>
+                    <li><strong>Versatility:</strong> Applicable to various real-world problems</li>
+                    <li><strong>Systematic:</strong> Follows a clear, step-by-step procedure</li>
+                </ul>
+
+                <h3>Real-World Applications</h3>
+                <div class="intro-box">
+                    <ul>
+                        <li><strong>Manufacturing:</strong> Optimizing production schedules and resource allocation</li>
+                        <li><strong>Transportation:</strong> Minimizing shipping costs and delivery routes</li>
+                        <li><strong>Finance:</strong> Portfolio optimization and investment strategies</li>
+                        <li><strong>Agriculture:</strong> Crop planning and land utilization</li>
+                        <li><strong>Healthcare:</strong> Staff scheduling and resource management</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Terms Section -->
+            <div id="terms" class="section">
+                <h2>📖 Key Terms in Simplex Method</h2>
+
+                <div class="term-card">
+                    <div class="term-title">1. Objective Function</div>
+                    <p>The mathematical expression that needs to be maximized or minimized. It represents the goal of the optimization problem, such as maximizing profit or minimizing cost. Example: Z = 3x₁ + 4x₂</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">2. Decision Variables</div>
+                    <p>The variables that can be controlled or decided upon in the problem. These are the unknowns we solve for (typically x₁, x₂, x₃, etc.). They represent quantities like production levels or resource allocations.</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">3. Constraints</div>
+                    <p>Linear inequalities or equations that restrict the values of decision variables. They represent limitations such as resource availability, capacity limits, or demand requirements. Example: 2x₁ + 3x₂ ≤ 100</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">4. Feasible Region</div>
+                    <p>The set of all possible solutions that satisfy all constraints simultaneously. It forms a polygon (or polyhedron in higher dimensions) where the optimal solution must lie.</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">5. Basic Variables</div>
+                    <p>Variables that have non-zero values in a particular solution. In the simplex tableau, these correspond to the identity matrix columns. The number of basic variables equals the number of constraints.</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">6. Non-Basic Variables</div>
+                    <p>Variables set to zero in a particular basic feasible solution. These variables are not part of the current basis but may enter in subsequent iterations.</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">7. Slack Variables</div>
+                    <p>Variables added to convert inequality constraints (≤) into equalities. They represent unused resources or surplus capacity. Example: x₁ + x₂ + s₁ = 10 (where s₁ is the slack variable)</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">8. Pivot Element</div>
+                    <p>The element in the simplex tableau used to perform row operations in each iteration. It's located at the intersection of the entering variable column and the leaving variable row.</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">9. Basic Feasible Solution (BFS)</div>
+                    <p>A feasible solution where the number of non-zero variables equals the number of constraints. The simplex method moves from one BFS to another, improving the objective function value each time.</p>
+                </div>
+
+                <div class="term-card">
+                    <div class="term-title">10. Optimality Condition</div>
+                    <p>The criterion that determines when the optimal solution is reached. For maximization problems, it's when all coefficients in the objective function row are non-positive. For minimization, all coefficients should be non-negative.</p>
+                </div>
+            </div>
+
+            <!-- Examples Section -->
+            <div id="examples" class="section">
+                <h2>💡 Simple Examples of Simplex Method</h2>
+                <p style="font-size: 1.15em; margin-bottom: 30px;">Let's understand the Simplex Method through easy, real-life examples!</p>
+
+                <!-- Example 1: Lemonade Stand -->
+                <div class="example-box">
+                    <div class="example-title">
+                        <span class="example-icon">🍋</span>
+                        Example 1: Lemonade Stand (Super Simple!)
+                    </div>
+                    
+                    <div class="problem-statement">
+                        <h3 style="color: #2d6a4f; margin-top: 0;">The Story:</h3>
+                        <p style="font-size: 1.1em;">Maria sells two drinks at her lemonade stand:</p>
+                        <ul style="margin-top: 15px; font-size: 1.05em;">
+                            <li>🥤 <strong>Regular Lemonade:</strong> Makes $3 profit per cup</li>
+                            <li>🍹 <strong>Pink Lemonade:</strong> Makes $5 profit per cup</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-size: 1.05em;">She only has <strong>20 lemons</strong> today. Regular lemonade needs 1 lemon per cup, and pink lemonade needs 2 lemons per cup.</p>
+                        <p style="font-size: 1.1em; margin-top: 15px;"><strong style="color: #1b4332;">Question: How many of each drink should Maria make to earn the most money?</strong></p>
+                    </div>
+
+                    <div class="solution-steps">
+                        <h3 style="color: #1b4332; margin-top: 0;">📝 Let's Break It Down:</h3>
+                        
+                        <div class="step">
+                            <span class="step-number">What are we deciding?</span>
+                            <p style="font-size: 1.05em;">x₁ = cups of regular lemonade<br>x₂ = cups of pink lemonade</p>
+                        </div>
+
+                        <div class="step">
+                            <span class="step-number">What do we want? (Our Goal)</span>
+                            <div class="formula" style="font-size: 1.15em;">Maximize Profit = $3x₁ + $5x₂</div>
+                            <p style="font-style: italic; color: #2d6a4f;">Translation: We want to make as much money as possible!</p>
+                        </div>
+
+                        <div class="step">
+                            <span class="step-number">What's our limit?</span>
+                            <div class="formula" style="font-size: 1.15em;">1x₁ + 2x₂ ≤ 20 lemons</div>
+                            <p style="font-style: italic; color: #2d6a4f;">Translation: We can't use more than 20 lemons total</p>
+                        </div>
+
+                        <div class="highlight-box">
+                            <h3 style="margin-top: 0; color: #1b4332;">🤔 Let's Think About This:</h3>
+                            <p style="font-size: 1.05em;"><strong>Option 1:</strong> Make only regular lemonade = 20 cups × $3 = <strong>$60 profit</strong></p>
+                            <p style="font-size: 1.05em;"><strong>Option 2:</strong> Make only pink lemonade = 10 cups × $5 = <strong>$50 profit</strong></p>
+                            <p style="font-size: 1.05em; margin-top: 10px;">Wait! Pink lemonade makes more per cup ($5 vs $3), but uses 2 lemons instead of 1. So we can only make 10 cups!</p>
+                        </div>
+
+                        <h3 style="color: #1b4332; margin-top: 25px;">🎯 The Simplex Method Finds:</h3>
+                        <p style="font-size: 1.1em;">The method tests all possible combinations and discovers that making <strong>20 regular lemonades</strong> is actually the best choice!</p>
+                        
+                        <div class="highlight-box" style="background: #fff9c4;">
+                            <p style="font-size: 1.05em;"><strong>Why?</strong> Because even though pink lemonade earns more per cup, it uses twice the lemons. With only 20 lemons, we maximize profit by making more cups of the simpler drink!</p>
+                        </div>
+                    </div>
+
+                    <div class="answer-box">
+                        ✅ BEST CHOICE: Make 20 cups of Regular Lemonade = $60 Maximum Profit! 🎉
+                    </div>
+                </div>
+
+                <!-- Example 2: Pizza Shop -->
+                <div class="example-box">
+                    <div class="example-title">
+                        <span class="example-icon">🍕</span>
+                        Example 2: Pizza Shop (Easy to Follow!)
+                    </div>
+                    
+                    <div class="problem-statement">
+                        <h3 style="color: #2d6a4f; margin-top: 0;">The Story:</h3>
+                        <p style="font-size: 1.1em;">Tony's Pizza Shop makes two types of pizza:</p>
+                        <ul style="margin-top: 15px; font-size: 1.05em;">
+                            <li>🍕 <strong>Cheese Pizza:</strong> Profit = $8 per pizza, Takes 10 minutes to make</li>
+                            <li>🍕 <strong>Supreme Pizza:</strong> Profit = $12 per pizza, Takes 15 minutes to make</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-size: 1.05em;">Tony has <strong>120 minutes</strong> (2 hours) before closing time.</p>
+                        <p style="font-size: 1.1em; margin-top: 15px;"><strong style="color: #1b4332;">Question: How many of each pizza should he make to maximize profit?</strong></p>
+                    </div>
+
+                    <div class="solution-steps">
+                        <h3 style="color: #1b4332; margin-top: 0;">📝 Let's Break It Down:</h3>
+                        
+                        <div class="step">
+                            <span class="step-number">What are we deciding?</span>
+                            <p style="font-size: 1.05em;">x₁ = number of cheese pizzas<br>x₂ = number of supreme pizzas</p>
+                        </div>
+
+                        <div class="step">
+                            <span class="step-number">What do we want? (Our Goal)</span>
+                            <div class="formula" style="font-size: 1.15em;">Maximize Profit = $8x₁ + $12x₂</div>
+                            <p style="font-style: italic; color: #2d6a4f;">Translation: We want to make as much money as possible!</p>
+                        </div>
+
+                        <div class="step">
+                            <span class="step-number">What's our limit?</span>
+                            <div class="formula" style="font-size: 1.15em;">10x₁ + 15x₂ ≤ 120 minutes</div>
+                            <p style="font-style: italic; color: #2d6a4f;">Translation: We can't use more than 120 minutes total</p>
+                        </div>
+
+                        <div class="highlight-box">
+                            <h3 style="margin-top: 0; color: #1b4332;">🤔 Let's Think About This:</h3>
+                            <p style="font-size: 1.05em;"><strong>Option 1:</strong> Make only cheese pizzas = 12 pizzas × $8 = <strong>$96 profit</strong></p>
+                            <p style="font-size: 1.05em;"><strong>Option 2:</strong> Make only supreme pizzas = 8 pizzas × $12 = <strong>$96 profit</strong></p>
+                            <p style="font-size: 1.05em; margin-top: 10px;">Interesting! Both options give the same profit because the profit-to-time ratio is equal (cheese: $8/10min = $0.80 per minute, supreme: $12/15min = $0.80 per minute).</p>
+                        </div>
+
+                        <h3 style="color: #1b4332; margin-top: 25px;">🎯 The Simplex Method Finds:</h3>
+                        <p style="font-size: 1.1em;">The method discovers that Tony can make <strong>8 supreme pizzas</strong> for maximum profit (or 12 cheese pizzas, or any mix that uses all 120 minutes)!</p>
+                        
+                        <div class="highlight-box" style="background: #fff9c4;">
+                            <p style="font-size: 1.05em;"><strong>Why?</strong> When the profit-to-time ratio is the same, multiple solutions work equally well! Any combination that uses exactly 120 minutes will give $96 profit.</p>
+                        </div>
+                    </div>
+
+                    <div class="answer-box">
+                        ✅ BEST CHOICE: Make 8 Supreme Pizzas (or 12 Cheese Pizzas) = $96 Maximum Profit! 🎉
+                    </div>
+                </div>
+
+                <!-- Interactive Exercise -->
+                <div class="example-box" style="border: 4px solid #2d6a4f; background: linear-gradient(135deg, #fff9c4, #ffe082);">
+                    <div class="example-title" style="color: #1b4332;">
+                        <span class="example-icon">✏️</span>
+                        Practice Exercise: Try It Yourself!
+                    </div>
+                    
+                    <div class="problem-statement" style="background: white;">
+                        <h3 style="color: #2d6a4f; margin-top: 0;">Your Turn:</h3>
+                        <p style="font-size: 1.1em;">A bakery makes cupcakes and brownies:</p>
+                        <ul style="margin-top: 15px; font-size: 1.05em;">
+                            <li>🧁 <strong>Cupcakes:</strong> Profit = $<input type="number" id="cupcakeProfit" value="4" style="width: 60px; padding: 5px; border: 2px solid #52b788; border-radius: 5px;"> per dozen, Uses <input type="number" id="cupcakeFlour" value="2" style="width: 60px; padding: 5px; border: 2px solid #52b788; border-radius: 5px;"> cups of flour</li>
+                            <li>🍫 <strong>Brownies:</strong> Profit = $<input type="number" id="brownieProfit" value="6" style="width: 60px; padding: 5px; border: 2px solid #52b788; border-radius: 5px;"> per dozen, Uses <input type="number" id="brownieFlour" value="3" style="width: 60px; padding: 5px; border: 2px solid #52b788; border-radius: 5px;"> cups of flour</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-size: 1.05em;">Available flour: <input type="number" id="totalFlour" value="30" style="width: 80px; padding: 5px; border: 2px solid #52b788; border-radius: 5px;"> cups</p>
+                        
+                        <button onclick="solveExercise()" class="submit-btn" style="margin-top: 20px; padding: 12px 30px; font-size: 1em;">
+                            Calculate Best Solution 🔢
+                        </button>
+                    </div>
+
+                    <div id="exerciseResult" style="display: none; margin-top: 25px; padding: 25px; background: white; border-radius: 12px; border-left: 5px solid #2d6a4f;">
+                        <h3 style="color: #1b4332; margin-top: 0;">📊 Your Solution:</h3>
+                        <div id="exerciseOutput"></div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.7); border-radius: 10px;">
+                        <p style="margin: 0; font-size: 1.05em;"><strong>💡 Instructions:</strong> Change the numbers above and click "Calculate" to see how the optimal solution changes! Try different values to understand how the Simplex Method works.</p>
+                    </div>
+                </div>
+
+                <!-- Visual Summary -->
+                <div class="intro-box" style="margin-top: 40px;">
+                    <h3 style="color: #1b4332; margin-top: 0;">🎯 What Did We Learn?</h3>
+                    <ul style="line-height: 2; font-size: 1.05em;">
+                        <li><strong>🍋 Lemonade Stand:</strong> Sometimes making MORE of the simpler item is better!</li>
+                        <li><strong>🍕 Pizza Shop:</strong> Different combinations can give the same result when ratios are balanced</li>
+                        <li><strong>✏️ Practice Exercise:</strong> Now YOU can experiment with different values to see how solutions change!</li>
+                        <li><strong>✨ The Magic:</strong> Simplex Method tests ALL possibilities and finds the BEST answer mathematically!</li>
+                        <li><strong>💡 Key Idea:</strong> It's not always obvious what's best - that's why we need the Simplex Method!</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quiz" class="section">
+                <h2>✏️ Test Your Knowledge</h2>
+                <p style="font-size: 1.1em; margin-bottom: 30px;">Answer all 10 questions and click Submit to see your score!</p>
+
+                <form id="quizForm">
+                    <div class="quiz-question">
+                        <div class="question-text">1. Who developed the Simplex Method?</div>
+                        <label class="option"><input type="radio" name="q1" value="a"> John Nash</label>
+                        <label class="option"><input type="radio" name="q1" value="b"> George Dantzig</label>
+                        <label class="option"><input type="radio" name="q1" value="c"> Leonid Kantorovich</label>
+                        <label class="option"><input type="radio" name="q1" value="d"> Alan Turing</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">2. What is the primary purpose of the objective function?</div>
+                        <label class="option"><input type="radio" name="q2" value="a"> To add constraints</label>
+                        <label class="option"><input type="radio" name="q2" value="b"> To define what needs to be optimized</label>
+                        <label class="option"><input type="radio" name="q2" value="c"> To eliminate variables</label>
+                        <label class="option"><input type="radio" name="q2" value="d"> To create slack variables</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">3. What are slack variables used for?</div>
+                        <label class="option"><input type="radio" name="q3" value="a"> To maximize profit</label>
+                        <label class="option"><input type="radio" name="q3" value="b"> To convert inequalities to equalities</label>
+                        <label class="option"><input type="radio" name="q3" value="c"> To reduce the number of constraints</label>
+                        <label class="option"><input type="radio" name="q3" value="d"> To eliminate decision variables</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">4. The feasible region is formed by:</div>
+                        <label class="option"><input type="radio" name="q4" value="a"> The objective function only</label>
+                        <label class="option"><input type="radio" name="q4" value="b"> All points satisfying the constraints</label>
+                        <label class="option"><input type="radio" name="q4" value="c"> Only the optimal solution</label>
+                        <label class="option"><input type="radio" name="q4" value="d"> The decision variables</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">5. In a maximization problem, the optimal solution is reached when:</div>
+                        <label class="option"><input type="radio" name="q5" value="a"> All coefficients in the objective row are positive</label>
+                        <label class="option"><input type="radio" name="q5" value="b"> All coefficients in the objective row are non-positive</label>
+                        <label class="option"><input type="radio" name="q5" value="c"> All variables are zero</label>
+                        <label class="option"><input type="radio" name="q5" value="d"> There are no constraints left</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">6. What are decision variables?</div>
+                        <label class="option"><input type="radio" name="q6" value="a"> Constants in the problem</label>
+                        <label class="option"><input type="radio" name="q6" value="b"> Variables that represent constraints</label>
+                        <label class="option"><input type="radio" name="q6" value="c"> Variables that can be controlled or decided upon</label>
+                        <label class="option"><input type="radio" name="q6" value="d"> Variables that are always equal to zero</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">7. A Basic Feasible Solution (BFS) has:</div>
+                        <label class="option"><input type="radio" name="q7" value="a"> All variables equal to zero</label>
+                        <label class="option"><input type="radio" name="q7" value="b"> Non-zero variables equal to the number of constraints</label>
+                        <label class="option"><input type="radio" name="q7" value="c"> No slack variables</label>
+                        <label class="option"><input type="radio" name="q7" value="d"> Only one non-zero variable</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">8. The pivot element is used to:</div>
+                        <label class="option"><input type="radio" name="q8" value="a"> Calculate the final answer directly</label>
+                        <label class="option"><input type="radio" name="q8" value="b"> Perform row operations in each iteration</label>
+                        <label class="option"><input type="radio" name="q8" value="c"> Eliminate all constraints</label>
+                        <label class="option"><input type="radio" name="q8" value="d"> Add new variables to the problem</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">9. Non-basic variables in a solution are:</div>
+                        <label class="option"><input type="radio" name="q9" value="a"> Always equal to one</label>
+                        <label class="option"><input type="radio" name="q9" value="b"> Set to zero</label>
+                        <label class="option"><input type="radio" name="q9" value="c"> Negative values</label>
+                        <label class="option"><input type="radio" name="q9" value="d"> Equal to the objective function value</label>
+                    </div>
+
+                    <div class="quiz-question">
+                        <div class="question-text">10. Which of the following is NOT a typical application of the Simplex Method?</div>
+                        <label class="option"><input type="radio" name="q10" value="a"> Production scheduling</label>
+                        <label class="option"><input type="radio" name="q10" value="b"> Portfolio optimization</label>
+                        <label class="option"><input type="radio" name="q10" value="c"> Weather prediction</label>
+                        <label class="option"><input type="radio" name="q10" value="d"> Transportation planning</label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Quiz</button>
+                </form>
+
+                <div id="result" class="result"></div>
+
+                <!-- Answer Key Section -->
+                <div style="margin-top: 50px; padding: 30px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 15px; border: 3px solid #2d6a4f;">
+                    <h3 style="color: #1b4332; margin-top: 0; font-size: 1.8em; text-align: center;">📋 Quiz Answer Key</h3>
+                    
+                    <div style="background: white; padding: 25px; border-radius: 12px; margin-top: 20px;">
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 1:</strong> Who developed the Simplex Method?<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) George Dantzig</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">George Dantzig developed the Simplex Method in 1947</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 2:</strong> What is the primary purpose of the objective function?<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) To define what needs to be optimized</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">The objective function represents the goal (maximize profit or minimize cost)</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 3:</strong> What are slack variables used for?<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) To convert inequalities to equalities</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">Slack variables turn ≤ constraints into = equations</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 4:</strong> The feasible region is formed by:<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) All points satisfying the constraints</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">The feasible region contains all solutions that meet all constraints</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 5:</strong> In a maximization problem, the optimal solution is reached when:<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) All coefficients in the objective row are non-positive</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">When all coefficients are ≤ 0, we can't improve the solution further</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 6:</strong> What are decision variables?<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: C) Variables that can be controlled or decided upon</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">These are the unknowns we solve for (like x₁, x₂)</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 7:</strong> A Basic Feasible Solution (BFS) has:<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) Non-zero variables equal to the number of constraints</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">BFS has exactly as many non-zero variables as there are constraints</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 8:</strong> The pivot element is used to:<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) Perform row operations in each iteration</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">The pivot element helps us move from one solution to a better one</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 9:</strong> Non-basic variables in a solution are:<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: B) Set to zero</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">Non-basic variables have a value of zero in the current solution</span>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f0fff4; border-left: 5px solid #52b788; border-radius: 8px;">
+                            <strong style="color: #1b4332; font-size: 1.1em;">Question 10:</strong> Which of the following is NOT a typical application of the Simplex Method?<br>
+                            <span style="color: #2d6a4f; font-size: 1.05em; margin-left: 20px;">✅ <strong>Answer: C) Weather prediction</strong></span><br>
+                            <span style="color: #666; margin-left: 20px; font-style: italic;">Weather prediction uses different mathematical models, not linear programming</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff9c4; padding: 20px; border-radius: 12px; margin-top: 25px; border: 2px solid #fbc02d;">
+                        <p style="margin: 0; font-size: 1.1em; text-align: center;"><strong>💡 Study Tip:</strong> Review the Key Terms section if you got any questions wrong!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            const buttons = document.querySelectorAll('.nav-btn');
+            
+            sections.forEach(section => section.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+            
+            document.getElementById('result').classList.remove('show');
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const answers = {
+                q1: 'b', q2: 'b', q3: 'b', q4: 'b', q5: 'b',
+                q6: 'c', q7: 'b', q8: 'b', q9: 'b', q10: 'c'
+            };
+            
+            let score = 0;
+            let answered = 0;
+            
+            for (let q in answers) {
+                const selected = document.querySelector(`input[name="${q}"]:checked`);
+                if (selected) {
+                    answered++;
+                    if (selected.value === answers[q]) {
+                        score++;
+                    }
+                }
+            }
+            
+            const resultDiv = document.getElementById('result');
+            
+            if (answered < 10) {
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.style.color = '#856404';
+                resultDiv.innerHTML = '⚠️ Please answer all questions before submitting!';
+            } else {
+                const percentage = (score / 10) * 100;
+                let message = '';
+                let bgColor = '';
+                
+                if (percentage >= 90) {
+                    message = `🌟 Excellent! You scored ${score}/10 (${percentage}%)`;
+                    bgColor = 'linear-gradient(135deg, #d8f3dc, #95d5b2)';
+                } else if (percentage >= 70) {
+                    message = `✅ Great job! You scored ${score}/10 (${percentage}%)`;
+                    bgColor = 'linear-gradient(135deg, #b7e4c7, #74c69d)';
+                } else if (percentage >= 50) {
+                    message = `👍 Good effort! You scored ${score}/10 (${percentage}%)`;
+                    bgColor = 'linear-gradient(135deg, #95d5b2, #52b788)';
+                } else {
+                    message = `📚 Keep learning! You scored ${score}/10 (${percentage}%)`;
+                    bgColor = 'linear-gradient(135deg, #fff3cd, #ffc107)';
+                }
+                
+                resultDiv.style.background = bgColor;
+                resultDiv.style.color = '#1b4332';
+                resultDiv.innerHTML = message;
+            }
+            
+            resultDiv.classList.add('show');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        function solveExercise() {
+            const cupcakeProfit = parseFloat(document.getElementById('cupcakeProfit').value) || 0;
+            const cupcakeFlour = parseFloat(document.getElementById('cupcakeFlour').value) || 0;
+            const brownieProfit = parseFloat(document.getElementById('brownieProfit').value) || 0;
+            const brownieFlour = parseFloat(document.getElementById('brownieFlour').value) || 0;
+            const totalFlour = parseFloat(document.getElementById('totalFlour').value) || 0;
+
+            if (cupcakeFlour === 0 || brownieFlour === 0 || totalFlour === 0) {
+                alert('Please enter valid numbers greater than 0!');
+                return;
+            }
+
+            // Calculate options
+            const onlyCupcakes = Math.floor(totalFlour / cupcakeFlour);
+            const cupcakeProfit_total = onlyCupcakes * cupcakeProfit;
+
+            const onlyBrownies = Math.floor(totalFlour / brownieFlour);
+            const brownieProfit_total = onlyBrownies * brownieProfit;
+
+            // Determine best option
+            let result = '';
+            if (cupcakeProfit_total > brownieProfit_total) {
+                result = `
+                    <div style="background: #d8f3dc; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                        <h4 style="color: #1b4332; margin-top: 0;">🤔 Let's Compare:</h4>
+                        <p style="font-size: 1.05em;"><strong>Option 1:</strong> Make only cupcakes = ${onlyCupcakes} dozen × ${cupcakeProfit} = <strong style="color: #2d6a4f;">${cupcakeProfit_total} profit ✓</strong></p>
+                        <p style="font-size: 1.05em;"><strong>Option 2:</strong> Make only brownies = ${onlyBrownies} dozen × ${brownieProfit} = <strong>${brownieProfit_total} profit</strong></p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #b7e4c7, #95d5b2); padding: 20px; border-radius: 12px; text-align: center; font-size: 1.2em; font-weight: bold; color: #1b4332;">
+                        ✅ BEST SOLUTION: Make ${onlyCupcakes} dozen Cupcakes 🧁<br>Maximum Profit = ${cupcakeProfit_total}! 🎉
+                    </div>
+                    <div style="background: #fff9c4; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <p style="margin: 0;"><strong>💡 Why?</strong> Cupcakes give better profit per flour used (${(cupcakeProfit/cupcakeFlour).toFixed(2)} per cup) compared to brownies (${(brownieProfit/brownieFlour).toFixed(2)} per cup)</p>
+                    </div>
+                `;
+            } else if (brownieProfit_total > cupcakeProfit_total) {
+                result = `
+                    <div style="background: #d8f3dc; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                        <h4 style="color: #1b4332; margin-top: 0;">🤔 Let's Compare:</h4>
+                        <p style="font-size: 1.05em;"><strong>Option 1:</strong> Make only cupcakes = ${onlyCupcakes} dozen × ${cupcakeProfit} = <strong>${cupcakeProfit_total} profit</strong></p>
+                        <p style="font-size: 1.05em;"><strong>Option 2:</strong> Make only brownies = ${onlyBrownies} dozen × ${brownieProfit} = <strong style="color: #2d6a4f;">${brownieProfit_total} profit ✓</strong></p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #b7e4c7, #95d5b2); padding: 20px; border-radius: 12px; text-align: center; font-size: 1.2em; font-weight: bold; color: #1b4332;">
+                        ✅ BEST SOLUTION: Make ${onlyBrownies} dozen Brownies 🍫<br>Maximum Profit = ${brownieProfit_total}! 🎉
+                    </div>
+                    <div style="background: #fff9c4; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <p style="margin: 0;"><strong>💡 Why?</strong> Brownies give better profit per flour used (${(brownieProfit/brownieFlour).toFixed(2)} per cup) compared to cupcakes (${(cupcakeProfit/cupcakeFlour).toFixed(2)} per cup)</p>
+                    </div>
+                `;
+            } else {
+                result = `
+                    <div style="background: #d8f3dc; padding: 20px; border-radius: 10px; margin: 15px 0;">
+                        <h4 style="color: #1b4332; margin-top: 0;">🤔 Let's Compare:</h4>
+                        <p style="font-size: 1.05em;"><strong>Option 1:</strong> Make only cupcakes = ${onlyCupcakes} dozen × ${cupcakeProfit} = <strong style="color: #2d6a4f;">${cupcakeProfit_total} profit ✓</strong></p>
+                        <p style="font-size: 1.05em;"><strong>Option 2:</strong> Make only brownies = ${onlyBrownies} dozen × ${brownieProfit} = <strong style="color: #2d6a4f;">${brownieProfit_total} profit ✓</strong></p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #b7e4c7, #95d5b2); padding: 20px; border-radius: 12px; text-align: center; font-size: 1.2em; font-weight: bold; color: #1b4332;">
+                        ✅ BOTH ARE EQUAL! Make either ${onlyCupcakes} dozen Cupcakes OR ${onlyBrownies} dozen Brownies<br>Maximum Profit = ${cupcakeProfit_total}! 🎉
+                    </div>
+                    <div style="background: #fff9c4; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <p style="margin: 0;"><strong>💡 Why?</strong> Both products have the same profit per flour ratio! This means any combination will work equally well.</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('exerciseOutput').innerHTML = result;
+            document.getElementById('exerciseResult').style.display = 'block';
+            document.getElementById('exerciseResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
